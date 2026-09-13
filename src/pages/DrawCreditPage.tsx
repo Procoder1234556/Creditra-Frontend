@@ -46,6 +46,7 @@ import { mockCreditLines } from "@/lib/draw-credit-mock-data";
 import { normalizeCreditLineAvailability } from "@/lib/credit-line-availability";
 import { getDrawAmountValidation } from "@/utils/amountValidation";
 import { offlineMutation } from "@/utils/offline";
+import { mapCreditApiError } from "@/lib/creditApiErrors";
 import { useOnline } from "@/hooks/useOnline";
 import { WhyApr } from "@/components/WhyApr";
 import { DrawSummaryBar } from "@/components/DrawSummaryBar";
@@ -203,9 +204,22 @@ export default function DrawCreditPage() {
         offlineMessage:
           "You are offline, so your draw cannot be processed yet. It has been queued and will be submitted when your connection is restored.",
       });
-    } catch {
+    } catch (err) {
       setIsLoading(false);
       setIsOfflineBlocked(true);
+      // Surface typed credit-API errors when the mutation throws (#921).
+      if (!(err instanceof Error && /offline/i.test(err.message))) {
+        const mapped = mapCreditApiError(err);
+        setTransaction({
+          id: `TXN-ERR-${Date.now()}`,
+          creditLineId: line.id,
+          amount,
+          status: 'error',
+          message: mapped.userMessage,
+          timestamp: new Date(),
+        });
+        setStep('status');
+      }
     }
     // Always release the lock (success, offline-block, or throw) so a later
     // draw attempt — e.g. after reconnecting and flushing the queue, a failed
