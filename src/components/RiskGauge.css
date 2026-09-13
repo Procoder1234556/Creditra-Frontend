@@ -301,6 +301,40 @@
 
 /* ── Meta row (Trend / Last Updated) ────────────────────────────────────── */
 
+.risk-gauge-band-chip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  margin: 0.5rem 0 0.75rem;
+  font-size: var(--text-sm, 0.875rem);
+  font-weight: var(--font-semibold, 600);
+  color: var(--text);
+  text-align: center;
+}
+
+.risk-gauge-band-chip__glyph {
+  font-size: 0.7rem;
+  line-height: 1;
+}
+
+.risk-gauge-band-chip[data-band='high'] .risk-gauge-band-chip__glyph {
+  color: var(--success);
+}
+
+.risk-gauge-band-chip[data-band='medium'] .risk-gauge-band-chip__glyph {
+  color: var(--warning);
+}
+
+.risk-gauge-band-chip[data-band='low'] .risk-gauge-band-chip__glyph {
+  color: var(--error);
+}
+
+.risk-gauge-band-chip:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
 .risk-meta {
   display: flex;
   gap: var(--space-6, 1.5rem);

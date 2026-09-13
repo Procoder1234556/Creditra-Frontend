@@ -159,7 +159,12 @@ export function HealthFactorChart({
         <span
           className={`hf-chart__badge hf-chart__badge--${band} tabular-nums`}
           title={`Band: ${healthBandLabel(band)}`}
+          data-testid="hf-band-badge"
+          data-band={band}
         >
+          <span className="hf-chart__badge-glyph" aria-hidden="true">
+            {band === 'safe' ? '●' : band === 'caution' ? '▲' : '■'}
+          </span>
           {current.toFixed(2)} · {healthBandLabel(band)}
         </span>
       </figcaption>
@@ -171,6 +176,8 @@ export function HealthFactorChart({
         role="img"
         aria-labelledby={`${titleId} ${descId}`}
         className="hf-chart__svg"
+        tabIndex={0}
+        data-testid="hf-chart-svg"
       >
         <title id={titleId}>
           Health factor trend for {lineName}
@@ -178,6 +185,7 @@ export function HealthFactorChart({
         <desc id={descId}>
           Current health factor {current.toFixed(2)} ({healthBandLabel(band)}).
           Range {min.toFixed(2)} to {max.toFixed(2)} across {data.length} samples.
+          Press Tab to focus this chart; band is also listed in the data table below.
         </desc>
 
         {/* Caution threshold guide at HF = 1.25 */}
@@ -217,15 +225,20 @@ export function HealthFactorChart({
           <tr>
             <th scope="col">Date</th>
             <th scope="col">Health factor</th>
+            <th scope="col">Band</th>
           </tr>
         </thead>
         <tbody>
-          {data.map((p) => (
-            <tr key={p.date}>
-              <td>{p.date}</td>
-              <td>{p.value.toFixed(2)}</td>
-            </tr>
-          ))}
+          {data.map((p) => {
+            const pointBand = healthBand(p.value);
+            return (
+              <tr key={p.date}>
+                <td>{p.date}</td>
+                <td>{p.value.toFixed(2)}</td>
+                <td>{healthBandLabel(pointBand)}</td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </figure>

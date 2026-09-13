@@ -451,6 +451,10 @@ export function RiskGauge({
   const activeSector: RiskSector =
     normalizedScore >= 70 ? 'high' : normalizedScore >= 50 ? 'medium' : 'low';
 
+  const activeSectorDef = SECTORS.find((s) => s.id === activeSector)!;
+  /** Visible (non-color) band chip — WCAG 1.4.1 text equivalent for the arc fill. */
+  const bandChipLabel = `${activeSectorDef.label} (${activeSectorDef.range})`;
+
   function handleSectorActivate(sector: RiskSector) {
     const sectorDef = SECTORS.find((s) => s.id === sector);
     if (sectorDef) {
@@ -582,14 +586,38 @@ export function RiskGauge({
         </text>
       </svg>
 
-      <div className="risk-meta" aria-hidden="true">
+      {/*
+        Visible band chip — text + range, not color alone (WCAG 1.4.1).
+        Complements the colored arc so keyboard / low-vision users can read
+        the active band without relying on stroke hue.
+      */}
+      <p
+        className="risk-gauge-band-chip"
+        data-band={activeSector}
+        data-testid="risk-gauge-band-chip"
+        role="status"
+      >
+        <span className="risk-gauge-band-chip__glyph" aria-hidden="true">
+          {activeSector === 'high' ? '●' : activeSector === 'medium' ? '▲' : '■'}
+        </span>
+        <span className="risk-gauge-band-chip__text">{bandChipLabel}</span>
+      </p>
+
+      {/*
+        Meta row kept in the accessibility tree (not aria-hidden) so keyboard
+        users inspecting the widget get Trend + Last Updated as text, not only
+        via the live region / SVG title.
+      */}
+      <div className="risk-meta" role="group" aria-label="Risk score details">
         <div className="risk-meta-item">
           <span className="rm-label">Trend</span>
           <span
             className="rm-value"
+            data-trend={trend}
             style={{ color: `var(--${trend === 'improving' ? 'success' : trend === 'declining' ? 'error' : 'muted'})` }}
           >
-            {trendArrow} {trendLabel}
+            <span aria-hidden="true">{trendArrow} </span>
+            {trendLabel}
           </span>
         </div>
         <div className="risk-meta-item">

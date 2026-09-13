@@ -35,6 +35,14 @@
   padding: 0.15rem 0.5rem;
   border-radius: 999px;
   border: 1px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.hf-chart__badge-glyph {
+  font-size: 0.65rem;
+  line-height: 1;
 }
 
 .hf-chart__badge--safe {
@@ -60,6 +68,16 @@
   width: 100%;
   max-width: 100%;
   height: auto;
+  border-radius: 4px;
+}
+
+.hf-chart__svg:focus {
+  outline: none;
+}
+
+.hf-chart__svg:focus-visible {
+  outline: 2px solid var(--focus-ring-color, #58a6ff);
+  outline-offset: 3px;
 }
 
 .hf-chart__line {

@@ -644,3 +644,28 @@ describe('in-app reduced-motion toggle ([data-motion="reduced"])', () => {
     expect(css).toMatch(/@media \(prefers-reduced-motion: reduce\)[^]*?\.risk-gauge-fill/);
   });
 });
+
+describe('RiskGauge a11y text equivalents (issue #920)', () => {
+  it.each([
+    [100, 'high', /High score zone \(70–100\)/],
+    [70, 'high', /High score zone \(70–100\)/],
+    [69, 'medium', /Medium score zone \(50–69\)/],
+    [50, 'medium', /Medium score zone \(50–69\)/],
+    [49, 'low', /Low score zone \(0–49\)/],
+    [0, 'low', /Low score zone \(0–49\)/],
+  ] as const)('score %s exposes visible band chip data-band=%s', (score, band, label) => {
+    renderGauge({ score });
+    const chip = screen.getByTestId('risk-gauge-band-chip');
+    expect(chip).toHaveAttribute('data-band', band);
+    expect(chip).toHaveTextContent(label);
+    expect(chip).toHaveAttribute('role', 'status');
+  });
+
+  it('exposes Trend and Last Updated in the accessibility tree (not aria-hidden)', () => {
+    renderGauge({ trend: 'declining', lastUpdated: '2025-03-01T00:00:00Z' });
+    const group = screen.getByRole('group', { name: /risk score details/i });
+    expect(group).toBeInTheDocument();
+    expect(group).not.toHaveAttribute('aria-hidden', 'true');
+    expect(screen.getByText('Declining')).toBeInTheDocument();
+  });
+});

@@ -87,4 +87,40 @@ describe('HealthFactorChart', () => {
       screen.getByText(/no health-factor history yet for empty line/i),
     ).toBeInTheDocument();
   });
+
+  it('includes band text (not color alone) and keyboard-focusable SVG', () => {
+    render(
+      <HealthFactorChart data={data} current={1.0} lineName="Risk line" />,
+    );
+    const badge = screen.getByTestId('hf-band-badge');
+    expect(badge).toHaveAttribute('data-band', 'risk');
+    expect(badge).toHaveTextContent(/At risk/i);
+    const svg = screen.getByTestId('hf-chart-svg');
+    expect(svg).toHaveAttribute('tabindex', '0');
+  });
+
+  it('SR history table includes a Band column for every sample', () => {
+    render(
+      <HealthFactorChart data={data} current={1.8} lineName="Builder line" />,
+    );
+    expect(screen.getByRole('columnheader', { name: /^band$/i })).toBeInTheDocument();
+    expect(screen.getAllByText('Safe').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Caution').length).toBeGreaterThan(0);
+  });
+
+  it.each([
+    [2.5, 'safe', /Safe/i],
+    [1.5, 'caution', /Caution/i],
+    [1.0, 'risk', /At risk/i],
+  ] as const)('boundary current=%s maps to band %s', (current, band, label) => {
+    render(
+      <HealthFactorChart
+        data={[{ date: '2026-01-01', value: current }]}
+        current={current}
+        lineName="Boundary"
+      />,
+    );
+    expect(screen.getByTestId('hf-band-badge')).toHaveAttribute('data-band', band);
+    expect(screen.getByTestId('hf-band-badge')).toHaveTextContent(label);
+  });
 });
